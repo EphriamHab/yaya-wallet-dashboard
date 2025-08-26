@@ -15,5 +15,5 @@ export const yayaApi = axios.create({
     "YAYA-API-SECRET": process.env.YAYA_API_SECRET!,
     "Content-Type": "application/json",
   },
-  timeout: 30000,
+  timeout: 15000,
 });
