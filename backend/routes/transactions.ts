@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTransactions, searchTransactions } from '../controllers/transactionController.js';
+import { getTransactions, searchTransactions } from '../controllers/transactionController';
 
 const router = express.Router();
 
