@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import transactionRoutes from "./routes/transactions.js";
+import transactionRoutes from "./routes/transactions";
 
 dotenv.config();
 
@@ -27,7 +27,7 @@ app.use(limter);
 
 app.use(express.json());
 
-app.use('/transactions', transactionRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
