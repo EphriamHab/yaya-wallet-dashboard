@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { yayaApi } from '../config/api.js';
+import { yayaApi } from '../config/api';
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {
