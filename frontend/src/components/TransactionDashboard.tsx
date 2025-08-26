@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from 'react';
 import { TransactionTable } from './TransactionTable';
 import { SearchBar } from './SearchBar';
 import { Pagination } from './Pagination';
 import { useGetTransactionsQuery, useSearchTransactionsMutation } from '../store/api';
+import { Activity, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 
 export const TransactionDashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,67 +38,130 @@ export const TransactionDashboard: React.FC = () => {
     }
   };
 
-  // Use search data when in search mode, otherwise use regular transactions data
   const currentData = isSearchMode ? searchData : transactionsData;
   const isLoading = isSearchMode ? isSearching : isLoadingTransactions;
   const error = isSearchMode ? searchError : transactionsError;
 
+  const transactions = currentData?.data || [];
+  const totalIncoming = transactions
+    .filter(t => t.receiver === 'current_user')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const totalOutgoing = transactions
+    .filter(t => t.sender === 'current_user')
+    .reduce((sum, t) => sum + t.amount, 0);
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Transaction Dashboard</h1>
-          <p className="mt-2 text-gray-600">Monitor your account transactions</p>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg">
+              <Activity className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                Transaction Dashboard
+              </h1>
+              <p className="text-slate-600 text-lg">Monitor and manage your financial activities</p>
+            </div>
+          </div>
+
+          {!isLoading && transactions.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-200/60 p-6 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-600 text-sm font-medium mb-1">Total Transactions</p>
+                    <p className="text-3xl font-bold text-slate-900">{transactions.length}</p>
+                  </div>
+                  <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-200/60 p-6 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-600 text-sm font-medium mb-1">Total Incoming</p>
+                    <p className="text-3xl font-bold text-emerald-600">
+                      ${totalIncoming.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-200/60 p-6 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-600 text-sm font-medium mb-1">Total Outgoing</p>
+                    <p className="text-3xl font-bold text-rose-600">
+                      ${totalOutgoing.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl">
+                    <TrendingDown className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-6 border-b border-gray-200">
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
+          <div className="px-8 py-8 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200/60">
             <SearchBar 
               onSearch={handleSearch} 
               isLoading={isLoading}
             />
             
             {isSearchMode && searchQuery && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800">
-                  Showing search results for: <span className="font-semibold">"{searchQuery}"</span>
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-blue-800">
+                    Showing search results for: <span className="font-semibold bg-blue-100 px-2 py-1 rounded-lg">"{searchQuery}"</span>
+                  </p>
                   <button 
                     onClick={() => handleSearch('')}
-                    className="ml-2 text-blue-600 hover:text-blue-800 underline"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-100 px-3 py-1 rounded-lg transition-colors"
                   >
                     Clear search
                   </button>
-                </p>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="px-6 py-6">
+          <div className="px-8 py-8">
             {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-gray-600">Loading transactions...</span>
+              <div className="flex flex-col justify-center items-center py-20">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-blue-200 rounded-full"></div>
+                  <div className="w-16 h-16 border-4 border-blue-600 rounded-full animate-spin absolute top-0 left-0 border-t-transparent"></div>
+                </div>
+                <p className="mt-4 text-slate-600 font-medium">Loading transactions...</p>
               </div>
             ) : error ? (
-              <div className="text-center py-12">
-                <div className="text-red-600 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+              <div className="text-center py-20">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Activity className="w-8 h-8 text-red-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading transactions</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">Error loading transactions</h3>
+                <p className="text-slate-600 mb-6 max-w-md mx-auto">
                   {(error as any)?.data?.message || 'Something went wrong while fetching transactions.'}
                 </p>
                 <button 
                   onClick={() => window.location.reload()}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   Try Again
                 </button>
               </div>
             ) : (
-              <>
+              <div className="space-y-6">
                 <TransactionTable 
                   transactions={currentData?.data || []} 
                 />
@@ -109,7 +174,7 @@ export const TransactionDashboard: React.FC = () => {
                     isLoading={isLoading}
                   />
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
