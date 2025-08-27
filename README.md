@@ -41,7 +41,7 @@ A full-stack application for monitoring YaYa Wallet transactions with search, pa
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/EphriamHab/yaya-wallet-dashboard.git
 cd yaya-wallet-dashboard
 ```
 
