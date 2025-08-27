@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
-import { yayaApi } from "../config/api";
+import { generateSignature } from "../config/api";
+import axios from "axios";
 import {
   getMockTransactions,
   searchMockTransactions,
@@ -17,9 +18,21 @@ export const getTransactions = async (req: Request, res: Response) => {
       return res.json(mockData);
     }
 
-    const response = await yayaApi.get("/transaction/find-by-user", {
-      params: { p },
-    });
+    const { timestamp, signature } = generateSignature(""); 
+
+    const response = await axios.get(
+      `${process.env.YAYA_BASE_URL}/transaction/find-by-user`,
+      {
+        headers: {
+          "YAYA-API-KEY": process.env.YAYA_API_KEY!,
+          "YAYA-API-TIMESTAMP": timestamp,
+          "YAYA-API-SIGN": signature,
+          "Content-Type": "application/json",
+        },
+        params: { p: Number(p) },
+        timeout: 10000,
+      }
+    );
 
     res.json(response.data);
   } catch (error: any) {
@@ -56,7 +69,20 @@ export const searchTransactions = async (req: Request, res: Response) => {
       return res.json(mockData);
     }
 
-    const response = await yayaApi.post("/transaction/search", { query, p });
+    const body = JSON.stringify({ query, p });
+    const { timestamp, signature } = generateSignature(body);
+    const response = await axios.post(
+      `${process.env.YAYA_BASE_URL}/transaction/search`,
+      { query, p },
+      {
+        headers: {
+          "YAYA-API-KEY": process.env.YAYA_API_KEY!,
+          "YAYA-API-TIMESTAMP": timestamp,
+          "YAYA-API-SIGN": signature,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     res.json(response.data);
   } catch (error: any) {
     console.error(
