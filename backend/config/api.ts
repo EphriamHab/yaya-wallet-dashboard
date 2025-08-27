@@ -1,19 +1,11 @@
-import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import crypto from "crypto";
 
 
-if (!process.env.YAYA_API_KEY || !process.env.YAYA_API_SECRET) {
-  throw new Error("Missing YAYA API credentials");
+export function generateSignature(body: string = "") {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signature = crypto
+    .createHmac("sha256", process.env.YAYA_API_SECRET!)
+    .update(timestamp + body)
+    .digest("hex");
+  return { timestamp, signature };
 }
-
-export const yayaApi = axios.create({
-  baseURL: process.env.YAYA_BASE_URL, 
-  headers: {
-    "YAYA-API-KEY": process.env.YAYA_API_KEY,     
-    "YAYA-API-SECRET": process.env.YAYA_API_SECRET!,
-    "Content-Type": "application/json",
-  },
-  timeout: 15000,
-});
